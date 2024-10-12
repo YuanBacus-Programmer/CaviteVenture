@@ -1,4 +1,3 @@
-// utils/sendEmail.ts
 import nodemailer from 'nodemailer';
 
 interface EmailOptions {
@@ -23,5 +22,11 @@ export default async function sendEmail({ to, subject, text }: EmailOptions) {
     text,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Email sent to ${to}`);
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw new Error('Email sending failed');
+  }
 }
