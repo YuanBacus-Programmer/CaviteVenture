@@ -2,41 +2,15 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '../../utils/dbConnect';
 import User from '../../models/User';
 import jwt from 'jsonwebtoken';
-import multer from 'multer';
-import { Request, Response } from 'express'; // Importing types for Express
+import cloudinary from 'cloudinary';
+import { IncomingForm, Fields, Files } from 'formidable';  // Correct import for IncomingForm
 
-// Multer setup for file uploads
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: './public/uploads',
-    filename: (req, file, cb) => {
-      cb(null, `${Date.now()}-${file.originalname}`);
-    },
-  }),
+// Initialize Cloudinary with environment variables
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
-// Custom type for the Next.js API handler with Express Request and Response
-interface NextApiRequestWithFile extends NextApiRequest {
-  file?: Express.Multer.File;
-}
-
-// Helper function to run middleware manually
-const runMiddleware = (
-  req: Request,  // Express Request
-  res: Response, // Express Response
-  fn: (req: Request, res: Response, callback: (result: unknown) => void) => void
-): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    fn(req, res, (result) => {
-      if (result instanceof Error) {
-        return reject(result);
-      }
-      return resolve();
-    });
-  });
-};
-
-const JWT_SECRET = process.env.JWT_SECRET || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
 
 // Disable the default Next.js body parser for file uploads
 export const config = {
@@ -51,9 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     return handleGetRequest(req, res);
   } else if (req.method === 'PATCH') {
-    // Cast req and res to unknown first and then Express Request/Response for multer
-    await runMiddleware(req as unknown as Request, res as unknown as Response, upload.single('profilePicture'));
-    return handlePatchRequest(req as NextApiRequestWithFile, res);
+    return handlePatchRequest(req, res);
   } else {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -69,17 +41,13 @@ const handleGetRequest = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    // Verify and decode the JWT
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-
-    // Fetch user details using the userId from the decoded token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || '') as { userId: string };
     const user = await User.findById(decoded.userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Return user profile details
     return res.status(200).json({
       firstname: user.firstName,
       lastname: user.lastName,
@@ -88,7 +56,7 @@ const handleGetRequest = async (req: NextApiRequest, res: NextApiResponse) => {
       gender: user.gender,
       role: user.role,
       email: user.email,
-      profilePicture: user.profilePicture, // Include profile picture URL
+      profilePicture: user.profilePicture,
     });
   } catch (error) {
     console.error('JWT verification error:', error);
@@ -96,8 +64,19 @@ const handleGetRequest = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-// Handle PATCH request: Update user details
-const handlePatchRequest = async (req: NextApiRequestWithFile, res: NextApiResponse) => {
+// Use Formidable to parse the form data
+const parseForm = (req: NextApiRequest): Promise<{ fields: Fields; files: Files }> => {
+  const form = new IncomingForm();
+  return new Promise((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) return reject(err);
+      resolve({ fields, files });
+    });
+  });
+};
+
+// Handle PATCH request: Update user details and upload profile picture to Cloudinary
+const handlePatchRequest = async (req: NextApiRequest, res: NextApiResponse) => {
   const authHeader = req.headers.authorization;
   const token = authHeader?.split(' ')[1];
 
@@ -106,28 +85,29 @@ const handlePatchRequest = async (req: NextApiRequestWithFile, res: NextApiRespo
   }
 
   try {
-    // Verify and decode the JWT
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-
-    // Find user by userId
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || '') as { userId: string };
     const user = await User.findById(decoded.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update user fields from request body
-    const { firstname, lastname, birthday, location, gender } = req.body;
+    // Parse the form data
+    const { fields, files } = await parseForm(req);
+    const { firstname, lastname, birthday, location, gender } = fields;
 
-    user.firstName = firstname || user.firstName;
-    user.lastName = lastname || user.lastName;
-    user.birthday = birthday || user.birthday;
-    user.location = location || user.location;
-    user.gender = gender || user.gender;
+    user.firstName = firstname?.toString() || user.firstName;
+    user.lastName = lastname?.toString() || user.lastName;
+    user.birthday = birthday ? new Date(birthday.toString()) : user.birthday;
+    user.location = location?.toString() || user.location;
+    user.gender = gender?.toString() || user.gender;
 
-    // If a new profile picture is uploaded, update it
-    if (req.file) {
-      const profilePicturePath = `/uploads/${req.file.filename}`;
-      user.profilePicture = profilePicturePath;
+    // If a new profile picture is provided, upload it to Cloudinary
+    if (files.profilePicture) {
+      const file = Array.isArray(files.profilePicture) ? files.profilePicture[0] : files.profilePicture;
+      const uploadResult = await cloudinary.v2.uploader.upload(file.filepath, {
+        folder: 'profile_pictures',
+      });
+      user.profilePicture = uploadResult.secure_url;
     }
 
     // Save updated user information to the database
@@ -143,7 +123,7 @@ const handlePatchRequest = async (req: NextApiRequestWithFile, res: NextApiRespo
         gender: user.gender,
         role: user.role,
         email: user.email,
-        profilePicture: user.profilePicture, // Include updated profile picture
+        profilePicture: user.profilePicture,
       },
     });
   } catch (error) {
