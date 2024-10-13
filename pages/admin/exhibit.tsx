@@ -1,8 +1,10 @@
-import React from 'react'
+import Navbar from "@/components/NavbarAdmin"
 
 const exhibit = () => {
   return (
-    <div>exhibit</div>
+    <>
+      <Navbar/>
+    </>
   )
 }
 
