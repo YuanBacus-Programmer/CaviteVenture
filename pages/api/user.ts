@@ -99,7 +99,11 @@ const handlePatchRequest = async (req: NextApiRequest, res: NextApiResponse) => 
     user.lastName = lastname?.toString() || user.lastName;
     user.birthday = birthday ? new Date(birthday.toString()) : user.birthday;
     user.location = location?.toString() || user.location;
-    user.gender = gender?.toString() || user.gender;
+
+    // Validate and assign gender value
+    if (gender && ['male', 'female', 'other'].includes(gender.toString())) {
+      user.gender = gender.toString() as 'male' | 'female' | 'other';
+    }
 
     // If a new profile picture is provided, upload it to Cloudinary
     if (files.profilePicture) {
