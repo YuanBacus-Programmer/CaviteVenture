@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import Navbar from '../../components/NavbarSuperAdmin';
-import PrivateRoute from '../../components/PrivateRoute';
-import AllVisit from '@/components/AllVisit';
-import { User, Settings, FileText } from 'lucide-react';
+"use client"
 
-// Define type for the DashboardCard props
+import React, { useEffect, useState } from 'react'
+import Navbar from '../../components/NavbarSuperAdmin'
+import PrivateRoute from '../../components/PrivateRoute'
+import AllVisit from '@/components/AllVisit'
+import { User, Settings, FileText } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
 interface DashboardCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; // More explicit type for the icon
+  title: string
+  value: string | number
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 
 const DashboardCard: React.FC<DashboardCardProps> = ({ title, value, icon: Icon }) => (
@@ -21,45 +23,52 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ title, value, icon: Icon 
       <p className="text-2xl font-semibold">{value}</p>
     </div>
   </div>
-);
+)
+
+interface MonthlyData {
+  month: string
+  users: number
+}
 
 const Dashboard: React.FC = () => {
-  const [totalUsers, setTotalUsers] = useState<number>(0);
-  const [maleCount, setMaleCount] = useState<number>(0);
-  const [femaleCount, setFemaleCount] = useState<number>(0);
-  const [otherCount, setOtherCount] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [totalUsers, setTotalUsers] = useState<number>(0)
+  const [maleCount, setMaleCount] = useState<number>(0)
+  const [femaleCount, setFemaleCount] = useState<number>(0)
+  const [otherCount, setOtherCount] = useState<number>(0)
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchStatistics = async () => {
       try {
-        const response = await fetch('/api/statistics');
+        const response = await fetch('/api/statistics')
         if (!response.ok) {
-          throw new Error('Failed to fetch statistics');
+          throw new Error('Failed to fetch statistics')
         }
-        const data = await response.json();
-        setTotalUsers(data.totalUsers);
-        setMaleCount(data.male);
-        setFemaleCount(data.female);
-        setOtherCount(data.other);
-        setIsLoading(false);
+        const data = await response.json()
+        setTotalUsers(data.totalUsers)
+        setMaleCount(data.male)
+        setFemaleCount(data.female)
+        setOtherCount(data.other)
+        setMonthlyData(data.monthlyData)
+        setIsLoading(false)
       } catch (err) {
-        console.error('Error fetching statistics:', err);
-        setError('Failed to load statistics');
-        setIsLoading(false);
+        console.error('Error fetching statistics:', err)
+        setError('Failed to load statistics')
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchStatistics();
-  }, []);
+    fetchStatistics()
+  }, [])
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -67,7 +76,7 @@ const Dashboard: React.FC = () => {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <p className="text-red-500">{error}</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -86,6 +95,21 @@ const Dashboard: React.FC = () => {
               <DashboardCard title="Other" value={otherCount} icon={Settings} />
             </div>
             
+            <div className="bg-white rounded-lg shadow p-6 mb-8">
+              <h2 className="text-xl font-semibold mb-4">Monthly User Growth</h2>
+              <div className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="users" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">Visit Statistics</h2>
               <AllVisit />
@@ -94,7 +118,7 @@ const Dashboard: React.FC = () => {
         </main>
       </div>
     </PrivateRoute>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard
