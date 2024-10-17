@@ -82,7 +82,7 @@ const Navbar = () => {
                 {/* Logout Button for Desktop */}
                 <motion.button
                   onClick={signOut}
-                  className="px-4 py-2 rounded-full text-sm font-medium text-white bg-[#f5d697] text-gray-900 hover:bg-[#f4c571] transition-colors duration-200 flex items-center space-x-2"
+                  className="px-4 py-2 rounded-full text-sm font-medium text-white bg-[#f5d697] hover:bg-[#f4c571] transition-colors duration-200 flex items-center space-x-2"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -143,7 +143,7 @@ const Navbar = () => {
                   setIsOpen(false)
                   signOut()
                 }}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium bg-[#f5d697] text-gray-900 hover:bg-[#f4c571] transition-colors duration-200 flex items-center space-x-2"
+                className="w-full text-left px-3 py-2 rounded-md text-base font-medium bg-[#f5d697] text-gray-900 hover:bg-[#f4c571] transition-colors duration-200 flex items-center space-x-2"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
