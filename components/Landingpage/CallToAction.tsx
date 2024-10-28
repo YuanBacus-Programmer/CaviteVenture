@@ -1,4 +1,4 @@
-import RightArrow from "@/assets/HeaderImages/arrow-right.svg";
+import RightArrow from "@/assets/HeaderImages/next (1).png";
 import Image from "next/image";
 import starImage from "@/assets/CallToActionImages/star.png";
 import springImage from "@/assets/CallToActionImages/spring.png";
