@@ -6,8 +6,8 @@ import { Toaster, toast } from 'react-hot-toast'
 import axios from 'axios'
 import Image from 'next/image'
 import useSWR from 'swr'
-import { Eye, EyeOff, Camera } from 'lucide-react'
-import Navbar from '../components/Navbar';
+import { Eye, EyeOff, Camera} from 'lucide-react'
+import Navbar from '../components/Navbar'
 
 interface User {
   firstname: string
@@ -159,267 +159,298 @@ export default function Profile() {
   }
 
   return (
-    
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="container mx-auto px-4 py-8"
-    >
+    <div className="min-h-screen bg-white">
       <Navbar />
       <Toaster position="top-right" />
-      <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-center mb-6">Profile</h2>
-          <div className="flex flex-col items-center space-y-4">
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full overflow-hidden">
-                <Image src={profilePicture} alt="Profile picture" width={128} height={128} className="object-cover" />
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto bg-gradient-to-br from-white to-[#fae8b4] shadow-lg rounded-lg overflow-hidden">
+          <div className="md:flex">
+            <div className="md:w-1/3 bg-[#cbbd93] p-8 border-r border-[#80775c]">
+              <div className="text-center">
+                <div className="relative inline-block">
+                  <Image
+                    src={profilePicture}
+                    alt="Profile picture"
+                    width={160}
+                    height={160}
+                    className="rounded-full border-4 border-white shadow-lg"
+                  />
+                  {editMode && (
+                    <button
+                      className="absolute bottom-0 right-0 bg-[#574a24] text-white p-2 rounded-full shadow-md"
+                      onClick={handleImageClick}
+                    >
+                      <Camera className="h-5 w-5" />
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    accept="image/*"
+                  />
+                </div>
+                <h2 className="mt-4 text-2xl font-semibold text-[#574a24]">{user?.firstname} {user?.lastname}</h2>
+                <p className="text-[#80775c]">{user?.role}</p>
               </div>
-              {editMode && (
+              <div className="mt-8">
                 <button
-                  className="absolute bottom-0 right-0 bg-gray-800 text-white p-2 rounded-full"
-                  onClick={handleImageClick}
+                  onClick={() => setEditMode(!editMode)}
+                  className="w-full px-4 py-2 bg-[#574a24] text-white rounded-md hover:bg-[#80775c] transition duration-300"
                 >
-                  <Camera className="h-4 w-4" />
+                  {editMode ? 'Cancel' : 'Edit Profile'}
                 </button>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                onChange={handleFileChange}
-                className="hidden"
-                accept="image/*"
-              />
+              </div>
             </div>
-
-            <AnimatePresence mode="wait">
-              {editMode ? (
-                <motion.div
-                  key="edit-form"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-4 w-full"
-                >
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label htmlFor="firstname" className="block text-sm font-medium text-gray-700">First Name</label>
+            <div className="md:w-2/3 p-8">
+              <h3 className="text-3xl font-semibold mb-6 text-[#574a24]">Profile Information</h3>
+              <AnimatePresence mode="wait">
+                {editMode ? (
+                  <motion.div
+                    key="edit-form"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-6"
+                  >
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="firstname" className="block text-sm font-medium text-[#574a24]">First Name</label>
+                        <input
+                          id="firstname"
+                          name="firstname"
+                          value={formData.firstname}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="lastname" className="block text-sm font-medium text-[#574a24]">Last Name</label>
+                        <input
+                          id="lastname"
+                          name="lastname"
+                          value={formData.lastname}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-[#574a24]">Email</label>
                       <input
-                        id="firstname"
-                        name="firstname"
-                        value={formData.firstname}
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label htmlFor="lastname" className="block text-sm font-medium text-gray-700">Last Name</label>
+                    <div>
+                      <label htmlFor="location" className="block text-sm font-medium text-[#574a24]">Location</label>
                       <input
-                        id="lastname"
-                        name="lastname"
-                        value={formData.lastname}
+                        id="location"
+                        name="location"
+                        value={formData.location}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50"
                       />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="birthday" className="block text-sm font-medium text-gray-700">Birthday</label>
-                    <input
-                      id="birthday"
-                      name="birthday"
-                      type="date"
-                      value={formData.birthday}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
-                    <input
-                      id="location"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700">Gender</label>
-                    <select
-                      id="gender"
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    >
-                      <option value="">Select gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => setEditMode(false)}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSave}
-                      className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="view-profile"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-2 w-full"
-                >
-                  <p><strong>Name:</strong> {user?.firstname} {user?.lastname}</p>
-                  <p><strong>Birthday:</strong> {user?.birthday}</p>
-                  <p><strong>Location:</strong> {user?.location}</p>
-                  <p><strong>Gender:</strong> {user?.gender}</p>
-                  <p><strong>Role:</strong> {user?.role}</p>
-                  <p><strong>Email:</strong> {user?.email}</p>
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => setEditMode(true)}
-                      className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Edit Profile
-                    </button>
-                    <button
-                      onClick={() => setShowEmailModal(true)}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Change Password
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    <div>
+                      <label htmlFor="birthday" className="block text-sm font-medium text-[#574a24]">Birthday</label>
+                      <input
+                        id="birthday"
+                        name="birthday"
+                        type="date"
+                        value={formData.birthday}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="gender" className="block text-sm font-medium text-[#574a24]">Gender</label>
+                      <select
+                        id="gender"
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50"
+                      >
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={handleSave}
+                        className="px-6 py-2 bg-[#574a24] text-white rounded-md hover:bg-[#80775c] transition duration-300"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="view-profile"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-4"
+                  >
+                    <ProfileItem label="Name" value={`${user?.firstname} ${user?.lastname}`} />
+                    <ProfileItem label="Email" value={user?.email} />
+                    <ProfileItem label="Location" value={user?.location} />
+                    <ProfileItem label="Birthday" value={user?.birthday} />
+                    <ProfileItem label="Gender" value={user?.gender} />
+                    <div className="pt-4">
+                      <button
+                        onClick={() => setShowEmailModal(true)}
+                        className="text-[#574a24] hover:text-[#80775c] transition duration-300"
+                      >
+                        Change Password
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Modals */}
       {showEmailModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-lg font-medium mb-4">Change Password</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Enter your email to receive a verification code.
-            </p>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  placeholder="Enter your email"
-                />
-              </div>
-              <button
-                onClick={handleEmailSubmit}
-                className="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Send Verification Code
-              </button>
+        <Modal title="Change Password" onClose={() => setShowEmailModal(false)}>
+          <p className="text-sm text-[#80775c] mb-4">
+            Enter your email to receive a verification code.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-[#574a24]">Email</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50"
+                placeholder="Enter your email"
+              />
             </div>
+            <button
+              onClick={handleEmailSubmit}
+              className="w-full px-4 py-2 bg-[#574a24] text-white rounded-md hover:bg-[#80775c] transition duration-300"
+            >
+              Send Verification Code
+            </button>
           </div>
-        </div>
+        </Modal>
       )}
 
       {showVerificationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-lg font-medium mb-4">Enter Verification Code</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              We&apos;ve sent a verification code to your email. Please enter it below.
-            </p>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="verificationCode" className="block text-sm font-medium text-gray-700">Verification Code</label>
-                <input
-                  id="verificationCode"
-                  
-                  type="text"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  placeholder="Enter verification code"
-                />
-              </div>
-              <button
-                onClick={handleVerificationSubmit}
-                className="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Verify Code
-              </button>
+        <Modal title="Enter Verification Code" onClose={() => setShowVerificationModal(false)}>
+          <p className="text-sm text-[#80775c] mb-4">
+            We've sent a verification code to your email. Please enter it below.
+          
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="verificationCode" className="block text-sm font-medium text-[#574a24]">Verification Code</label>
+              <input
+                id="verificationCode"
+                type="text"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50"
+                placeholder="Enter verification code"
+              />
             </div>
+            
+            <button
+              onClick={handleVerificationSubmit}
+              className="w-full px-4 py-2 bg-[#574a24] text-white rounded-md hover:bg-[#80775c] transition duration-300"
+            >
+              Verify Code
+            </button>
           </div>
-        </div>
+        </Modal>
       )}
 
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-lg font-medium mb-4">Reset Your Password</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Enter your new password below.
-            </p>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">New Password</label>
-                <div className="relative">
-                  <input
-                    id="newPassword"
-                    type={passwordVisible ? 'text' : 'password'}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 pr-10"
-                    placeholder="Enter new password"
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setPasswordVisible(!passwordVisible)}
-                  >
-                    {passwordVisible ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+        <Modal title="Reset Your Password" onClose={() => setShowPasswordModal(false)}>
+          <p className="text-sm text-[#80775c] mb-4">
+            Enter your new password below.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="newPassword" className="block text-sm font-medium text-[#574a24]">New Password</label>
+              <div className="relative">
                 <input
-                  id="confirmPassword"
+                  id="newPassword"
                   type={passwordVisible ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  placeholder="Confirm new password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50 pr-10"
+                  placeholder="Enter new password"
                 />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setPasswordVisible(!passwordVisible)}
+                >
+                  {passwordVisible ? <EyeOff className="h-5 w-5 text-[#80775c]" /> : <Eye className="h-5 w-5 text-[#80775c]" />}
+                </button>
               </div>
-              <button
-                onClick={handlePasswordSubmit}
-                className="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Reset Password
-              </button>
             </div>
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#574a24]">Confirm Password</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="mt-1 block w-full rounded-md border-[#cbbd93] shadow-sm focus:border-[#80775c] focus:ring focus:ring-[#fae8b4] focus:ring-opacity-50"
+                placeholder="Confirm new password"
+              />
+            </div>
+            <button
+              onClick={handlePasswordSubmit}
+              className="w-full px-4 py-2 bg-[#574a24] text-white rounded-md hover:bg-[#80775c] transition duration-300"
+            >
+              Reset Password
+            </button>
           </div>
-        </div>
+        </Modal>
       )}
-    </motion.div>
+    </div>
+  )
+}
+
+function ProfileItem({ label, value }: { label: string; value: string | undefined }) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-[#cbbd93]">
+      <span className="text-[#80775c]">{label}</span>
+      <span className="font-medium text-[#574a24]">{value || 'Not set'}</span>
+    </div>
+  )
+}
+
+function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg max-w-md w-full">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-[#574a24]">{title}</h3>
+          <button onClick={onClose} className="text-[#80775c] hover:text-[#574a24]">
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
   )
 }
