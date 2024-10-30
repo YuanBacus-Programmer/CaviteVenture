@@ -303,7 +303,11 @@ export default function Profile() {
                     <ProfileItem label="Name" value={`${user?.firstname} ${user?.lastname}`} />
                     <ProfileItem label="Email" value={user?.email} />
                     <ProfileItem label="Location" value={user?.location} />
-                    <ProfileItem label="Birthday" value={user?.birthday} />
+                    <ProfileItem
+  label="Birthday"
+  value={user?.birthday ? new Date(user.birthday).toLocaleDateString() : 'Not set'}
+/>
+
                     <ProfileItem label="Gender" value={user?.gender} />
                     <div className="pt-4">
                       <button
@@ -352,7 +356,7 @@ export default function Profile() {
       {showVerificationModal && (
         <Modal title="Enter Verification Code" onClose={() => setShowVerificationModal(false)}>
           <p className="text-sm text-[#80775c] mb-4">
-            We've sent a verification code to your email. Please enter it below.
+            We&aposve sent a verification code to your email. Please enter it below.
           
           </p>
           <div className="space-y-4">

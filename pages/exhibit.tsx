@@ -8,7 +8,6 @@ const Exhibit = () => {
     <PrivateRoute>
       <Navbar />
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold">Exhibit Page</h1>
         <Exhibitpro/>
       </div>
     </PrivateRoute>
